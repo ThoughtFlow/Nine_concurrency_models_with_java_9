@@ -24,11 +24,7 @@ public class PromisePrimeCounter implements PrimeCounter {
 		for (LongRange nextRange : ranges) {
 		
 			CompletableFuture<Long> nextPromise = CompletableFuture.supplyAsync(
-					() -> {
-						    // Don't start until the first promise has been fired. Otherwise, counting will start immediately,
-//							Util.uncheckedGet(firstPromise);
-							return Util.countPrimesForOneRange(nextRange).get();
-						  });
+					() -> Util.countPrimesForOneRange(nextRange).get());
 			
 			// Create one big chain of promises to sum the results.
 			lastPromise = lastPromise.thenCombine(nextPromise, (first, second) -> first + second);
