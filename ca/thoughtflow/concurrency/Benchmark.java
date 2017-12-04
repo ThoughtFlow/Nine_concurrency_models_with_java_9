@@ -16,7 +16,7 @@ import java.util.stream.IntStream;
  */
 public class Benchmark {
 
-	private static final String USAGE = "Timer numberOfRanges range primeCounterClassNames...";
+	private static final String USAGE = "Usage: numberOfRanges range iterations primeCounterClassNames...";
 	
 	private static List<String> getClassesNotFound(List<String> classes) {
 		
@@ -129,7 +129,7 @@ public class Benchmark {
 	
 	public static void main(String[] args) {
 
-		if (args.length > 2) {
+		if (args.length > 3) {
 			try {
 				int numberOfRanges = Integer.parseInt(args[0]);
 				long range = Long.parseLong(args[1]);

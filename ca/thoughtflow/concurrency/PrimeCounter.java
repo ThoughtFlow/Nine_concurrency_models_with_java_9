@@ -24,6 +24,7 @@ public interface PrimeCounter {
 	 * Counts all of the prime numbers found in the list of ranges and returns the count.
 	 * 
 	 * @return The count of primes in the range.
+	 * @throws CountingException Thrown if the primes could not be counted.
 	 */
 	public long countPrimes() throws CountingException;
 	

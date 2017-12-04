@@ -40,6 +40,6 @@ public class CachedThreadPoolPrimeCounter implements PrimeCounter {
 
 	@Override
 	public void tearDown() {
-		executor.shutdownNow();
+		executor.shutdown();
 	}
 }

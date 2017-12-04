@@ -5,8 +5,11 @@ import static ca.thoughtflow.concurrency.Util.getDefaultParallelism;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Flow;
 import java.util.concurrent.Flow.Subscription;
+import java.util.concurrent.Future;
 import java.util.concurrent.SubmissionPublisher;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -50,7 +53,8 @@ public class ReactiveStreamPrimeFinder implements PrimeCounter {
 	private static class ReactiveWorker implements Flow.Subscriber<LongRange> {
 
 		private final CompletableFuture<Long> finalCount = new CompletableFuture<>();
-		private long count = 0;
+		private final ExecutorService cachedThreadPool = Executors.newCachedThreadPool();
+		private final List<Future<Long>> futures = new LinkedList<>();
 		private Subscription subscription;
 		
 		@Override
@@ -63,7 +67,9 @@ public class ReactiveStreamPrimeFinder implements PrimeCounter {
 		
 		@Override
 		public void onComplete() {
-			finalCount.complete(count);
+			cachedThreadPool.shutdown();
+		
+			finalCount.complete(futures.stream().mapToLong(f -> Util.uncheckedGet(f)).sum());
 		}
 
 		@Override
@@ -73,7 +79,7 @@ public class ReactiveStreamPrimeFinder implements PrimeCounter {
 
 		@Override
 		public void onNext(LongRange nextRange) {
-			count += Util.countPrimesForOneRange(nextRange).get();
+			futures.add(cachedThreadPool.submit(() -> Util.countPrimesForOneRange(nextRange).get()));
 			
 			// Subscriber must communicate that it's ready to receive more requests.			
 			subscription.request(1);
