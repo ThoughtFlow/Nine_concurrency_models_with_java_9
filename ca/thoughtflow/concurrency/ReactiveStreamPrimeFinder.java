@@ -67,9 +67,8 @@ public class ReactiveStreamPrimeFinder implements PrimeCounter {
 		
 		@Override
 		public void onComplete() {
-			cachedThreadPool.shutdown();
-		
 			finalCount.complete(futures.stream().mapToLong(f -> Util.uncheckedGet(f)).sum());
+			cachedThreadPool.shutdown();
 		}
 
 		@Override
@@ -79,6 +78,7 @@ public class ReactiveStreamPrimeFinder implements PrimeCounter {
 
 		@Override
 		public void onNext(LongRange nextRange) {
+			// To avoid blocking, fire this off as soon as possible.
 			futures.add(cachedThreadPool.submit(() -> Util.countPrimesForOneRange(nextRange).get()));
 			
 			// Subscriber must communicate that it's ready to receive more requests.			
